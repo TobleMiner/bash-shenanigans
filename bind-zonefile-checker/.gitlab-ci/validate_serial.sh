@@ -78,11 +78,11 @@ is_quoted() {
   [[ -n "$QUOTED" ]]
 }
 
-# Check if there are no unfinished strings and braces are balanced
+# Check if we are not in quoted state and braces are balanced
 is_line_finished() {
   local nesting=0
 
-  # Check if we are still in a quoted section.
+  # Check if we are in quoted section
   if is_quoted; then
     # Line can't end while still quoted, fail
     return 1
@@ -108,9 +108,9 @@ is_line_finished() {
 }
 
 # Break line from a zonefile into its elements.
-# Elements seperated by whitespace are handled as separate tokens
+# Elements separated by whitespace are handled as separate tokens
 # Notable exceptions to this are:
-#   Tokens seperated by escaped (\ ) whitespace
+#   Tokens separated by escaped (\ ) whitespace
 #   Tokens enclosed in quotation marks ("foo bar baz")
 #   Braced that are neither escaped not enclosed in quotes. Those are always separate tokens
 # Terminates on end of line or unescaped, unquoted comment denoted by ';'
@@ -218,7 +218,7 @@ extract_serial_sub() {
   local zone="$1"                          # Full zonefile
   local linenum="$2"                       # Line to start parsing at
   local soa_token="$3"                     # Index of token 'SOA' inside global token array
-  local serial_token="$((soa_token + 4))"  # Calvulated index of serial token in global token array (always at fixed offset, see RFC1035)
+  local serial_token="$((soa_token + 4))"  # Calculated index of serial token in global token array (always at fixed offset, see RFC1035)
   local i=0
   while read line; do
     # Skip to line after $linenum
