@@ -396,7 +396,7 @@ while read zonefile; do
     # Check if one of the regexes matched the current file
     if [[ -z "$match" ]]; then
       # Continue outer loop if there was no match
-      continue 2
+      continue
     fi
   fi
   echo "File \"$zonefile\" changed"
