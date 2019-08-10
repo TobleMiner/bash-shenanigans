@@ -215,37 +215,30 @@ has_token() {
 # Fails if serial can't be found
 # Returns the serial if it has been found
 extract_serial_sub() {
-  local zone="$1"                          # Full zonefile
-  local linenum="$2"                       # Line to start parsing at
-  local soa_token="$3"                     # Index of token 'SOA' inside global token array
+  local soa_token="$1"                     # Index of token 'SOA' inside global token array
   local serial_token="$((soa_token + 4))"  # Calculated index of serial token in global token array (always at fixed offset, see RFC1035)
-  local i=0
   while read line; do
-    # Skip to line after $linenum
-    if [[ "$i" -gt "$linenum" ]]; then
-      debug "sub: $line $i"
-      # Append tokens of this line to global array TOKENS
-      tokenize "$line"
-      # Check if line has ended, this denotes the end of the record
-      if is_line_finished; then
-        # Check if index of serial token is outside global token array, then fail
-        if [[ "${#TOKENS[@]}" -le "$serial_token" ]]; then
-          return 1
-        fi
-        # Return what is probably the serial
-        echo "${TOKENS[$serial_token]}"
-        return 0
+    debug "sub: $line"
+    # Append tokens of this line to global array TOKENS
+    tokenize "$line"
+    # Check if line has ended, this denotes the end of the record
+    if is_line_finished; then
+      # Check if index of serial token is outside global token array, then fail
+      if [[ "${#TOKENS[@]}" -le "$serial_token" ]]; then
+        return 1
       fi
+      # Return what is probably the serial
+      echo "${TOKENS[$serial_token]}"
+      return 0
     fi
-    (( i++ )) || true
-  done <<< "$zone"
+  done
   return 1
 }
 
 # Extracts the serial from zonefile passed as $1
 extract_serial() {
   zone="$1"
-  local i=0
+  local i=1
   while read line; do
     debug "main: $line $i"
     # Reset global tokenizer state
@@ -263,7 +256,7 @@ extract_serial() {
       # Break out parsing of the rest of the record into subroutine
       # This allows us to continue scanning if the serial is not found
       # with no additional setupo required
-      serial="$(extract_serial_sub "$zone" "$i" "$soa_token")"
+      serial="$(tail -n +"$((i + 1))" <<< "$zone" | extract_serial_sub "$soa_token")"
       serial_found="$?"
       set -e
       # Return immediately if serial has been found
