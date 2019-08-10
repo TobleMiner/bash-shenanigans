@@ -1,0 +1,20 @@
+image: debian:latest
+
+before_script:
+  - apt-get update
+  - apt-get install -y git
+
+stages:
+  - validate
+
+validate:
+  stage: validate
+  script:
+    - ./.gitlab-ci/validate_serial.sh -f '.*.zone'
+
+validate_merge:
+  stage: validate
+  script:
+    - ./.gitlab-ci/validate_serial.sh -f '.*.zone'
+  only:
+    - merge_requests
